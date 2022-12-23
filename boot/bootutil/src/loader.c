@@ -560,7 +560,7 @@ static bool
 boot_is_header_valid(const struct image_header *hdr, const struct flash_area *fap)
 {
     uint32_t size;
-
+    
     if (hdr->ih_magic != IMAGE_MAGIC) {
         return false;
     }
@@ -739,6 +739,7 @@ boot_validate_slot(struct boot_loader_state *state, int slot,
          * is erased.
          */
         if (slot != BOOT_PRIMARY_SLOT) {
+            BOOT_LOG_ERR("inside MCUBOOT_SWAP_USING_SCRATCH");
             swap_erase_trailer_sectors(state, fap);
         }
 #endif
@@ -749,6 +750,7 @@ boot_validate_slot(struct boot_loader_state *state, int slot,
     }
 
 #if defined(MCUBOOT_OVERWRITE_ONLY) && defined(MCUBOOT_DOWNGRADE_PREVENTION)
+    BOOT_LOG_ERR("inside MCUBOOT_OVERWRITE_ONLY");
     if (slot != BOOT_PRIMARY_SLOT) {
         /* Check if version of secondary slot is sufficient */
         rc = boot_version_cmp(
@@ -781,6 +783,7 @@ boot_validate_slot(struct boot_loader_state *state, int slot,
 #if !defined(__BOOTSIM__)
         BOOT_LOG_ERR("Image in the %s slot is not valid!",
                      (slot == BOOT_PRIMARY_SLOT) ? "primary" : "secondary");
+        BOOT_LOG_ERR("slot:%d BOOT_PRIMARY_SLOT:%d", slot, BOOT_PRIMARY_SLOT);
 #endif
         fih_rc = fih_int_encode(1);
         goto out;

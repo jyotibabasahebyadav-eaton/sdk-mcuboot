@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+rsource "board_init.Kconfig"
+
 mainmenu "MCUboot configuration"
 
 comment "MCUboot-specific configuration options"

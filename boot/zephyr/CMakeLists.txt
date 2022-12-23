@@ -84,12 +84,14 @@ if(EXISTS targets/${BOARD}.h)
   zephyr_library_compile_definitions(MCUBOOT_TARGET_CONFIG="${BOARD}.h")
 endif()
 
+
 # Zephyr port-specific sources.
 zephyr_library_sources(
   main.c
   flash_map_extended.c
   os.c
   keys.c
+  etn_fallback_image.c
   )
 
 if(DEFINED CONFIG_ENABLE_MGMT_PERUSER)
@@ -321,4 +323,8 @@ if(CONFIG_MCUBOOT_NRF_CLEANUP_PERIPHERAL)
 zephyr_library_sources(
   ${BOOT_DIR}/zephyr/nrf_cleanup.c
 )
+endif()
+
+if(CONFIG_BLR_BOARD_INIT)
+  zephyr_library_sources(board_init.c)
 endif()

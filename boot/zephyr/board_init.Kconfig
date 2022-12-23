@@ -1,0 +1,12 @@
+# board init kconfig
+
+# Copyright (c) 2022 eaton
+# SPDX-License-Identifier: Apache-2.0
+
+# Bright Layer configs for SYS_INIT
+config BLR_BOARD_INIT
+	bool "Enable board init"
+	default n
+	help
+	  Bright Layer config to enable BLR baord init APIs
+	  Can be set in board_name.conf file as well <CONFIG_BLR_BOARD_INIT=y>

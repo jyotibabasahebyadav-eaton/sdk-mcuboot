@@ -458,6 +458,7 @@ boot_swap_type_multi(int image_index)
                 table->image_ok_secondary_slot == secondary_slot.image_ok) &&
             (table->copy_done_primary_slot == BOOT_FLAG_ANY  ||
                 table->copy_done_primary_slot == primary_slot.copy_done)) {
+            
             BOOT_LOG_INF("Swap type: %s",
                          table->swap_type == BOOT_SWAP_TYPE_TEST   ? "test"   :
                          table->swap_type == BOOT_SWAP_TYPE_PERM   ? "perm"   :

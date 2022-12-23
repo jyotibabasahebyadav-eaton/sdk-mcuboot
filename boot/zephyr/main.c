@@ -34,6 +34,10 @@
 #include "bootutil/fault_injection_hardening.h"
 #include "flash_map_backend/flash_map_backend.h"
 
+#include <etn_fallback_image.h>
+
+#include "../../../../modules/hal/nordic/nrfx/hal/nrf_gpio.h"
+
 #ifdef CONFIG_FW_INFO
 #include <fw_info.h>
 #endif
@@ -164,6 +168,8 @@ void led_init(void)
 #endif
 
 void os_heap_init(void);
+
+
 
 #if defined(CONFIG_ARM)
 
@@ -452,8 +458,154 @@ static bool detect_pin(const char* port, int pin, uint32_t expected, int delay)
 }
 #endif
 
+#define SERIAL_FLASH_START_ADDRESS      0x00000
+#define SERIAL_FLASH_END_ADDRESS	    0x72000
+#define SERIAL_FLASH_LAST_1KB_ADDRESS	0x71C00
+
+#define INTERNAL_FLASH_START_ADDRESS    0xC200
+#define INTERNAL_FLASH_END_ADDRESS	    0x7E000
+#define INTERNAL_FLASH_LAST_1KB_ADDRESS 0x7DC00
+
+const char *is25name = "IS25";
+const struct device *dev_is25;
+const struct device *dev_iflash;
+
+static void setup_is25(void)
+{
+	/* get device binding to is25 */
+	dev_is25 = device_get_binding(is25name);
+
+	if (dev_is25 == NULL)
+	{
+		printk("device binding to IS25 failed\n");
+		return;
+	}
+	else
+	{
+		printk("device binding to IS25 sucess\n");
+	}
+}
+
+static void setup_iflash(void)
+{
+    
+    /* get device binding for internal flash */
+	dev_iflash = flash_device_get_binding(DT_CHOSEN_ZEPHYR_FLASH_CONTROLLER_LABEL);
+
+	if (dev_iflash == NULL)
+	{
+		printk("device binding to internal flash failed\n");
+		return;
+	}
+	else
+	{
+		printk("device binding to internal flash sucess\n");
+	}
+}
+
+static void read_from_serial_flash(uint32_t address, uint32_t length, uint8_t type)
+{
+	int flash_status=0;
+	uint8_t data[128];
+	uint32_t len=0;
+	uint8_t loop_cntr=0;
+    uint32_t max_length=0;
+
+    max_length = length - address;
+
+	printk("\nreading %d bytes from address %d\n", max_length, address);
+	while( len < max_length )
+	{
+		flash_status = flash_read( dev_is25, address, data, 128 );
+		if( flash_status == 0)
+		{
+			if(type == 0 )
+			{
+				for(loop_cntr=0;loop_cntr<128;loop_cntr++)
+				{
+					printk("%02X ", data[loop_cntr]);
+				}
+				printk("\n");
+			}
+			else
+			{
+				for(loop_cntr=0;loop_cntr<128;loop_cntr++)
+				{
+					printk("%c", data[loop_cntr]);
+				}
+				printk("\n");
+			}
+		}
+		else
+		{
+			printk("serial flash read failed at %d\n", address);
+		}
+		address = address + 128;
+		len = len + 128;
+	}
+
+	printk("\nserial flash reading completed\n\n\n\n");
+
+}
+
+static void read_from_internal_flash(uint32_t address, uint32_t length, uint8_t type)
+{
+	int flash_status=0;
+	uint8_t data[128];
+	uint32_t len=0;
+	uint8_t loop_cntr=0;
+    uint32_t max_length=0;
+
+    max_length = length - address;
+
+	printk("\nreading %d bytes from address %d\n", max_length, address);
+	while( len < max_length )
+	{
+		flash_status = flash_read( dev_iflash, address, data, 128 );
+		if( flash_status == 0)
+		{
+			if(type == 0 )
+			{
+				for(loop_cntr=0;loop_cntr<128;loop_cntr++)
+				{
+					printk("%02X ", data[loop_cntr]);
+				}
+				printk("\n");
+			}
+			else
+			{
+				for(loop_cntr=0;loop_cntr<128;loop_cntr++)
+				{
+					printk("%c", data[loop_cntr]);
+				}
+				printk("\n");
+			}
+		}
+		else
+		{
+			printk("internal flash read failed at %d\n", address);
+		}
+		address = address + 128;
+		len = len + 128;
+	}
+
+	printk("\ninternal flash reading completed\n\n\n");
+
+}
+
 void main(void)
 {
+
+    //k_sleep(K_MSEC(5000));
+
+    printk("Before MCUboot loader start\n");
+
+    etn_fallback_image_test();
+    etn_fallback_set_run_location(FB_RUN_MCUBOOT);
+    etn_fallback_image_check();
+
+    printk("Before MCUboot loader end\n\n\n");
+
     struct boot_rsp rsp;
     int rc;
     fih_int fih_rc = FIH_FAILURE;
@@ -578,9 +730,11 @@ void main(void)
 #endif
 
     ZEPHYR_BOOT_LOG_STOP();
-
+     int64_t timestamp = k_uptime_get();
+      BOOT_LOG_INF("Bootloader running time:  %d",timestamp);
+      printk("Bootloader running time:  %d",timestamp);
     do_boot(&rsp);
-
+    
     BOOT_LOG_ERR("Never should get here");
     while (1)
         ;
