@@ -26,3 +26,6 @@
 	path = boot/espressif/hal/esp-idf
 	url = https://github.com/espressif/esp-idf.git
 	branch = release/v4.3
+[submodule "mcuboot"]
+	path = mcuboot
+	url = https://github.com/zephyrproject-rtos/mcuboot.git

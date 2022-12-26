@@ -84,14 +84,12 @@ if(EXISTS targets/${BOARD}.h)
   zephyr_library_compile_definitions(MCUBOOT_TARGET_CONFIG="${BOARD}.h")
 endif()
 
-
 # Zephyr port-specific sources.
 zephyr_library_sources(
   main.c
   flash_map_extended.c
   os.c
   keys.c
-  etn_fallback_image.c
   )
 
 if(DEFINED CONFIG_ENABLE_MGMT_PERUSER)

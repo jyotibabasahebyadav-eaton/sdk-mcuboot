@@ -34,7 +34,6 @@
 #include "bootutil/fault_injection_hardening.h"
 #include "flash_map_backend/flash_map_backend.h"
 
-#include <etn_fallback_image.h>
 
 #include "../../../../modules/hal/nordic/nrfx/hal/nrf_gpio.h"
 
@@ -595,17 +594,23 @@ static void read_from_internal_flash(uint32_t address, uint32_t length, uint8_t 
 
 void main(void)
 {
+    printk("\n \n mcuboot main.c entry \n \n");
+    setup_is25();
 
-    //k_sleep(K_MSEC(5000));
+    setup_iflash();
 
-    printk("Before MCUboot loader start\n");
+    printk("Before MCUboot loader start \n\n\n\n\n");
 
-    etn_fallback_image_test();
-    etn_fallback_set_run_location(FB_RUN_MCUBOOT);
-    etn_fallback_image_check();
+    //read_from_internal_flash(INTERNAL_FLASH_START_ADDRESS, INTERNAL_FLASH_END_ADDRESS,0);
+    //read_from_serial_flash(SERIAL_FLASH_START_ADDRESS, SERIAL_FLASH_END_ADDRESS,0);
 
-    printk("Before MCUboot loader end\n\n\n");
+    //read_from_internal_flash(INTERNAL_FLASH_LAST_1KB_ADDRESS, INTERNAL_FLASH_END_ADDRESS,0);
+    //read_from_serial_flash(SERIAL_FLASH_LAST_1KB_ADDRESS, SERIAL_FLASH_END_ADDRESS,0);
 
+
+    printk("Before MCUboot loader end \n\n\n\n\n");
+    
+    
     struct boot_rsp rsp;
     int rc;
     fih_int fih_rc = FIH_FAILURE;
